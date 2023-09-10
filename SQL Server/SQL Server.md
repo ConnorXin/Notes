@@ -508,9 +508,21 @@ ORDER BY deptno, sal DESC
 
 `%`
 表示包含某字符的任意长度数据
+```sql
+-- 查询姓名中包含 A 的信息
+SELECT *
+FROM emp
+WHERE ename LIKE '%A%'
+```
 
 `_`
 表示任意单个字符
+```sql
+-- 查询姓名中第二个字母是 A 的信息
+SELECT *
+FROM emp
+WHERE ename LIKE '_A%'
+```
 
 `[a-f]`
 a 到 f 中的任意单个字符
@@ -545,19 +557,144 @@ FROM Courses
 WHERE Cname LIKE 'DB\_设计' ESCAPE '\'
 ```
 
-```sql
-
-```
-
-
-
 ## 聚合函数
+
+1. **单行函数**
+
+   每一行返回一个值
+
+2. **多行函数**
+
+   多行返回一个值
+
+   ```sql
+   -- 聚合函数
+   -- 单行函数
+   SELECT LOWER(ename)
+   FROM emp
+
+   -- 多行函数
+   SELECT MAX(sal)
+   FROM emp
+   ```
+
+3. **聚合函数分类**
+   - `MAX()`
+   - `MIN()`
+   - `AVG()`
+   - `COUNT()`
+      ```sql
+      -- 计算记录的个数
+      SELECT COUNT(*)
+      FROM emp  -- 14
+      SELECT COUNT(deptno)
+      FROM emp  -- 14
+
+      -- 计算某个字段不重复个数
+      SELECT COUNT(DISTINCT deptno)
+      FROM emp  -- 3
+
+      -- 字段中有空值
+      SELECT COUNT(comm)
+      FROM emp  -- result: 4; 只统计非空值
+      ```
+> 单行函数和多行函数不能混用
+
 
 ## GROUP BY
 
+```sql
+-- GROUP BY
+-- 输出每个部门的编号和该部门的平均工资
+SELECT deptno, AVG(sal) "dept average sal"
+FROM emp
+GROUP BY deptno
+
+-- 两个分组选项
+SELECT deptno, job, SUM(sal) "total sal", COUNT(*) "count"
+FROM emp
+GROUP BY deptno, job
+ORDER BY [total sal] DESC
+```
+
 ## HAVING
 
+```sql
+-- HAVING: 对分组之后的信息进行过滤
+-- 部门平均工资大于2000的部门编号以及平均工资
+SELECT deptno, AVG(sal) "deptno avg sal"
+FROM emp
+GROUP BY deptno
+HAVING AVG(sal) > 2000
+
+SELECT deptno, AVG(sal) "deptno avg sal"
+FROM emp
+GROUP BY deptno
+HAVING COUNT(*) > 3  -- 对组内计数
+```
+
+```sql
+-- 姓名不包含 A 的所有员工按部门编号分组 平均工资大于2000
+SELECT deptno, AVG(sal) "average sal"
+FROM emp
+WHERE ename NOT LIKE '%A%'
+GROUP BY deptno
+HAVING AVG(sal) > 2000
+```
+
+
 ## 连接查询
+
+ **连接查询**
+
+ 将两个表或者两个以上的表以一定的连接条件连接起来，从中检索出满足条件的数据 
+
+### 内连接
+
+```sql
+-- 连接查询
+-- 内连接的三个用法
+-- 1. SELECT ... FROM A, B ...
+-- 两个表硬拼接 没有根据任何联系进行拼接
+SELECT *
+FROM emp, dept  -- emp: (14, 8); dept: (5, 3); result: (70, 11)
+
+-- 2. SELECT ... FROM A, B WHERE ...
+SELECT *
+FROM emp, dept
+WHERE EMPNO = 7499  -- 在 第一个用法的基础上添加过滤条件即可
+
+-- 3. SELECT ... FROM A JOIN B ON ...
+-- 输出 ename 的部门名称
+-- 将两个表根据某一个相同的字段进行连接
+SELECT "E".ename, "D".dname  -- 省略 "E", "D" 也可查询出结果
+FROM emp "E"
+JOIN dept "D"
+ON "E".deptno = "D".deptno  -- SQL92 标准
+-- 以上内连接等价于以下写法
+SELECT ename, dname
+FROM emp, dept
+WHERE emp.deptno = dept.deptno  -- SQL99 标准
+```
+```sql
+-- 工资大于 2000 的姓名和部门名称输出
+SELECT ename, dname
+FROM emp "E"
+JOIN dept "D"
+ON "E".deptno = "D".deptno
+WHERE sal > 2000
+```
+
+### 外连接
+
+### 完全连接
+
+### 交叉连接
+
+### 自连接
+
+### 联合
+
 
 ## 嵌套查询
 
